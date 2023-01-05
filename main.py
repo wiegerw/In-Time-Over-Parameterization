@@ -15,9 +15,8 @@ import torch.backends.cudnn as cudnn
 import sparselearning
 from sparselearning.core import Masking, CosineDecay, LinearDecay
 from sparselearning.models import AlexNet, VGG16, LeNet_300_100, LeNet_5_Caffe, WideResNet, MLP_CIFAR10, ResNet34, ResNet18
-from sparselearning.utils import get_mnist_dataloaders, get_cifar10_dataloaders, get_cifar100_dataloaders
-import torchvision
-import torchvision.transforms as transforms
+from sparselearning.utils import get_mnist_dataloaders, get_cifar10_dataloaders, get_cifar100_dataloaders, \
+    plot_class_feature_histograms
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 cudnn.benchmark = True
