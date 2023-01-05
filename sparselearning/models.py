@@ -372,7 +372,7 @@ class WideResNet(nn.Module):
         nChannels = [16, 16*widen_factor, 32*widen_factor, 64*widen_factor]
         assert((depth - 4) % 6 == 0)
         n = (depth - 4) / 6
-        block = BasicBlock
+        block = BasicBlock1
         # 1st conv before any network block
         self.conv1 = nn.Conv2d(3, nChannels[0], kernel_size=3, stride=1,
                                padding=1, bias=False)
@@ -461,7 +461,6 @@ class BasicBlock(nn.Module):
         self.in_planes = in_planes
 
     def forward(self, x):
-        conv_layers = []
         if not self.equalInOut:
             x = self.relu1(self.bn1(x))
             if self.save_features:
@@ -524,11 +523,11 @@ class NetworkBlock(nn.Module):
 ################################################ ResNet ####################################################
 ############################################################################################################
 
-class BasicBlock(nn.Module):
+class BasicBlock1(nn.Module):
     expansion = 1
 
     def __init__(self, in_planes, planes, stride=1):
-        super(BasicBlock, self).__init__()
+        super(BasicBlock1, self).__init__()
         self.conv1 = nn.Conv2d(in_planes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(planes)
         self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=1, padding=1, bias=False)
@@ -612,10 +611,10 @@ class ResNet(nn.Module):
 
 
 def ResNet18(c=1000):
-    return ResNet(BasicBlock, [2,2,2,2],c)
+    return ResNet(BasicBlock1, [2, 2, 2, 2], c)
 
 def ResNet34(c=10):
-    return ResNet(BasicBlock, [3,4,6,3],c)
+    return ResNet(BasicBlock1, [3, 4, 6, 3], c)
 
 def ResNet50(c=10):
     return ResNet(Bottleneck, [3,4,6,3],c)
