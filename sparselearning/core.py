@@ -83,7 +83,8 @@ class Masking(object):
             for module in self.modules:
                 for name, weight in module.named_parameters():
                     if name not in self.masks: continue
-                    self.masks[name] = torch.ones_like(weight, dtype=torch.float32, requires_grad=False).cuda()
+                    # self.masks[name] = torch.ones_like(weight, dtype=torch.float32, requires_grad=False).cuda()
+                    self.masks[name] = torch.ones_like(weight, dtype=torch.float32, requires_grad=False)
                     self.baseline_nonzero += (self.masks[name] != 0).sum().int().item()
 
         elif mode == 'lottery_ticket':
@@ -113,8 +114,8 @@ class Masking(object):
             for module in self.modules:
                 for name, weight in module.named_parameters():
                     if name not in self.masks: continue
-                    self.masks[name][:] = (torch.rand(weight.shape) < density).float().data.cuda() #lsw
-                    # self.masks[name][:] = (torch.rand(weight.shape) < density).float().data #lsw
+                    # self.masks[name][:] = (torch.rand(weight.shape) < density).float().data.cuda() #lsw
+                    self.masks[name][:] = (torch.rand(weight.shape) < density).float().data #lsw
                     self.baseline_nonzero += weight.numel()*density
 
         elif mode == 'ERK':
@@ -186,7 +187,8 @@ class Masking(object):
                 print(
                     f"layer: {name}, shape: {mask.shape}, density: {density_dict[name]}"
                 )
-                self.masks[name][:] = (torch.rand(mask.shape) < density_dict[name]).float().data.cuda()
+                # self.masks[name][:] = (torch.rand(mask.shape) < density_dict[name]).float().data.cuda()
+                self.masks[name][:] = (torch.rand(mask.shape) < density_dict[name]).float().data
 
                 total_nonzero += density_dict[name] * mask.numel()
             print(f"Overall sparsity {total_nonzero / total_params}")
@@ -225,7 +227,8 @@ class Masking(object):
         self.modules.append(module)
         for name, tensor in module.named_parameters():
             self.names.append(name)
-            self.masks[name] = torch.zeros_like(tensor, dtype=torch.float32, requires_grad=False).cuda()
+            # self.masks[name] = torch.zeros_like(tensor, dtype=torch.float32, requires_grad=False).cuda()
+            self.masks[name] = torch.zeros_like(tensor, dtype=torch.float32, requires_grad=False)
 
         print('Removing biases...')
         self.remove_weight_partial_name('bias')
@@ -448,7 +451,8 @@ class Masking(object):
             new_mask[self.fired_masks[name]==0] = 1.0
             n = (new_mask == 0).sum().item()
             expeced_growth_probability = ((total_regrowth-num_nonfired_weights) / n)
-            new_weights = torch.rand(new_mask.shape).cuda() < expeced_growth_probability
+            # new_weights = torch.rand(new_mask.shape).cuda() < expeced_growth_probability
+            new_weights = torch.rand(new_mask.shape) < expeced_growth_probability
             new_mask = new_mask.byte() | new_weights
         return new_mask
 
@@ -457,7 +461,8 @@ class Masking(object):
         n = (new_mask==0).sum().item()
         if n == 0: return new_mask
         expeced_growth_probability = (total_regrowth/n)
-        new_weights = torch.rand(new_mask.shape).cuda() < expeced_growth_probability
+        # new_weights = torch.rand(new_mask.shape).cuda() < expeced_growth_probability
+        new_weights = torch.rand(new_mask.shape) < expeced_growth_probability
         new_mask_ = new_mask.byte() | new_weights
         if (new_mask_!=0).sum().item() == 0:
             new_mask_ = new_mask
